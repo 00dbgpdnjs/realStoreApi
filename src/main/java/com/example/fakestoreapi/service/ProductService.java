@@ -1,6 +1,9 @@
 package com.example.fakestoreapi.service;
 
+import com.example.fakestoreapi.domain.Category;
 import com.example.fakestoreapi.domain.Product;
+import com.example.fakestoreapi.domain.Rating;
+import com.example.fakestoreapi.dto.AddProductDto;
 import com.example.fakestoreapi.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +15,25 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class ProductService {
     private final ProductRepository productRepository;
+    private final CategoryService categoryService;
+
+    @Transactional
+    public Product addProduct(AddProductDto addProductDto) {
+        Category category = categoryService.getCategory(addProductDto.getCategoryId());
+        Product product = new Product();
+        product.setCategory(category);
+        product.setPrice(addProductDto.getPrice());
+        product.setDescription(addProductDto.getDescription());
+        product.setImageUrl(addProductDto.getImageUrl());
+        product.setTitle(addProductDto.getTitle());
+        Rating rating = new Rating();
+        rating.setRate(0.0);
+        rating.setCount(0);
+        product.setRating(rating);
+
+        return productRepository.save(product);
+    }
+
 
     @Transactional(readOnly = true)
     public Page<Product> getProducts(Long categoryId, int page, int size) {
